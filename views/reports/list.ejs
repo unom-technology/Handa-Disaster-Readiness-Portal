@@ -1,0 +1,74 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<div class="page-head">
+  <div>
+    <h1><%= title %></h1>
+    <p class="sub"><%= admin ? 'All resident reports across the community.' : 'Incidents you have reported.' %></p>
+  </div>
+  <a href="/reports/new" class="btn">⚠️ New report</a>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <form method="GET" action="/reports" class="btn-row" style="align-items:center">
+    <label class="small muted" for="type">Filter by type:</label>
+    <select name="type" id="type" onchange="this.form.submit()" style="width:auto;padding:7px 10px;border:1px solid var(--line);border-radius:8px">
+      <option value="">All types</option>
+      <% types.forEach(function(t){ %>
+        <option value="<%= t %>" <%= typeFilter === t ? 'selected' : '' %>><%= t %></option>
+      <% }) %>
+    </select>
+    <% if (typeFilter) { %><a href="/reports" class="small">clear</a><% } %>
+  </form>
+</div>
+
+<% if (!reports.length) { %>
+  <div class="card"><p class="empty">No reports found.</p></div>
+<% } else { %>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th><th>Type</th><% if (admin) { %><th>Reporter</th><% } %>
+          <th>Severity</th><th>Status</th><th>When</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reports.forEach(function(r){ %>
+          <tr>
+            <td><a href="/reports/<%= r.id %>"><%= r.title %></a></td>
+            <td><%= r.type %></td>
+            <% if (admin) { %><td class="small"><%= r.reporter %></td><% } %>
+            <td><span class="pill pill-<%= r.severity %>"><%= r.severity %></span></td>
+            <td><span class="pill pill-<%= r.status %>"><%= r.status %></span></td>
+            <td class="small muted"><%= new Date(r.created_at + 'Z').toLocaleDateString() %></td>
+            <td>
+              <div class="btn-row">
+                <% if (admin) { %>
+                  <form action="/reports/<%= r.id %>/status" method="POST" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="status" value="verified" />
+                    <% if (r.status !== 'verified') { %><button class="btn btn-sm btn-secondary" title="Mark verified">✔ Verify</button><% } %>
+                  </form>
+                  <form action="/reports/<%= r.id %>/status" method="POST" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="status" value="resolved" />
+                    <% if (r.status !== 'resolved') { %><button class="btn btn-sm btn-ok" title="Mark resolved">✓ Resolve</button><% } %>
+                  </form>
+                <% } %>
+                <a href="/reports/<%= r.id %>/edit" class="btn btn-sm btn-secondary">Edit</a>
+                <form action="/reports/<%= r.id %>?_method=DELETE" method="POST" class="inline-form"
+                      onsubmit="return confirm('Delete this report?')">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/foot') %>

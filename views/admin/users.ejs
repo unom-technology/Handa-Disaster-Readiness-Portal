@@ -1,0 +1,48 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<div class="page-head">
+  <div><h1>👥 Manage users</h1><p class="sub">Promote residents to admins or remove accounts.</p></div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Role</th><th>Address</th><th>Alerts</th><th>Joined</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function(u){ %>
+        <tr>
+          <td><strong><%= u.name %></strong></td>
+          <td class="small"><%= u.email %></td>
+          <td><span class="role-badge <%= u.role %>"><%= u.role %></span></td>
+          <td class="small muted"><%= u.address || '—' %></td>
+          <td><%= u.alerts_opt_in ? '✅' : '—' %></td>
+          <td class="small muted"><%= new Date(u.created_at + 'Z').toLocaleDateString() %></td>
+          <td>
+            <% if (u.id === currentUser.id) { %>
+              <span class="small muted">(you)</span>
+            <% } else { %>
+              <div class="btn-row">
+                <form action="/admin/users/<%= u.id %>/role" method="POST" class="inline-form">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <input type="hidden" name="role" value="<%= u.role === 'admin' ? 'resident' : 'admin' %>" />
+                  <button class="btn btn-sm btn-secondary">
+                    <%= u.role === 'admin' ? 'Make resident' : 'Make admin' %>
+                  </button>
+                </form>
+                <form action="/admin/users/<%= u.id %>?_method=DELETE" method="POST" class="inline-form"
+                      onsubmit="return confirm('Delete <%= u.name %>? This also removes their reports.')">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </div>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/foot') %>

@@ -1,0 +1,50 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<section class="hero">
+  <h1>🛟 Handa</h1>
+  <p>
+    A community disaster readiness portal for the Philippines. Check live weather,
+    earthquakes and official disaster alerts, report hazards in your barangay, and
+    find the nearest evacuation center — all in one place.
+  </p>
+  <div class="btn-row" style="justify-content:center">
+    <a href="/register" class="btn">Create an account</a>
+    <a href="/login" class="btn btn-secondary">Log in</a>
+  </div>
+</section>
+
+<section class="grid grid-3 feature-grid">
+  <div class="card feature">
+    <div class="ico">🌦️</div>
+    <h3>Live Weather &amp; Rainfall</h3>
+    <p>Current conditions and a 4-day forecast from Open-Meteo, with risk flags for heavy rain and strong winds.</p>
+  </div>
+  <div class="card feature">
+    <div class="ico">🌏</div>
+    <h3>Earthquakes &amp; Alerts</h3>
+    <p>Recent quakes near you (USGS) plus official multi-hazard alerts from GDACS.</p>
+  </div>
+  <div class="card feature">
+    <div class="ico">🏠</div>
+    <h3>Evacuation Routing</h3>
+    <p>Find the nearest evacuation center and get driving directions using OpenStreetMap &amp; OSRM.</p>
+  </div>
+  <div class="card feature">
+    <div class="ico">⚠️</div>
+    <h3>Report Hazards</h3>
+    <p>Residents report floods, landslides and fires; admins verify and track them on a live map.</p>
+  </div>
+  <div class="card feature">
+    <div class="ico">📧</div>
+    <h3>Emergency Broadcasts</h3>
+    <p>Admins send email alerts to opted-in residents in seconds.</p>
+  </div>
+  <div class="card feature">
+    <div class="ico">📊</div>
+    <h3>Admin Dashboard</h3>
+    <p>At-a-glance statistics on users, reports and evacuation centers.</p>
+  </div>
+</section>
+
+<%- include('partials/foot') %>

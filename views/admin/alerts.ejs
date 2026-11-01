@@ -1,0 +1,56 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<div class="page-head">
+  <div><h1>🚨 Send emergency alert</h1><p class="sub">Email all residents who opted in to alerts.</p></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card form-card" style="margin:0">
+    <p class="small muted">
+      This will email <strong><%= optedIn %></strong> opted-in resident<%= optedIn === 1 ? '' : 's' %>.
+      Using the default setup, messages go to a free Ethereal test inbox and a preview link is shown below.
+    </p>
+    <form action="/admin/alerts" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="field">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" placeholder="e.g. Signal No. 3 — evacuate low-lying areas" required />
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" style="min-height:140px"
+                  placeholder="Clear instructions: what is happening, what residents should do, where to go." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Send this alert to <%= optedIn %> resident(s)?')">
+        Send alert
+      </button>
+    </form>
+  </div>
+
+  <div class="card" style="margin:0">
+    <div class="card-title"><h2>Recent broadcasts</h2></div>
+    <% if (!history.length) { %>
+      <p class="empty">No alerts sent yet.</p>
+    <% } else { %>
+      <ul class="item-list">
+        <% history.forEach(function(b){ %>
+          <li style="display:block">
+            <strong><%= b.title %></strong>
+            <div class="small muted">
+              <%= b.recipients_count %> recipient(s) ·
+              <%= new Date(b.created_at + 'Z').toLocaleString() %>
+              <% if (b.admin_name) { %> · by <%= b.admin_name %><% } %>
+            </div>
+            <div class="small" style="margin-top:4px;white-space:pre-line"><%= b.message %></div>
+            <% if (b.preview_url) { %>
+              <a class="small" href="<%= b.preview_url %>" target="_blank" rel="noopener">📧 View sent email ↗</a>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>

@@ -1,0 +1,59 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<div class="page-head">
+  <div>
+    <h1>🏠 Evacuation centers</h1>
+    <p class="sub">Click a marker on the map to get driving directions from your saved location.</p>
+  </div>
+  <% if (admin) { %><a href="/centers/new" class="btn">+ Add center</a><% } %>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div data-map="centers-map" class="map"></div>
+</div>
+<script type="application/json" id="centers-map">
+<%- JSON.stringify({
+  center: { lat: user.lat || 14.5995, lng: user.lng || 120.9842 },
+  zoom: 11,
+  user: user.lat ? { lat: user.lat, lng: user.lng, label: user.address || 'Your location' } : null,
+  centers: centers.map(c => ({ name: c.name, address: c.address, lat: c.lat, lng: c.lng, capacity: c.capacity, status: c.status }))
+}) %>
+</script>
+
+<% if (!centers.length) { %>
+  <div class="card"><p class="empty">No evacuation centers yet.</p></div>
+<% } else { %>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Address</th><th>Capacity</th><th>Contact</th><th>Status</th><% if (admin) { %><th>Actions</th><% } %></tr>
+      </thead>
+      <tbody>
+        <% centers.forEach(function(c){ %>
+          <tr>
+            <td><strong><%= c.name %></strong><% if (c.notes) { %><div class="small muted"><%= c.notes %></div><% } %></td>
+            <td class="small"><%= c.address || '—' %></td>
+            <td><%= c.capacity %></td>
+            <td class="small"><%= c.contact || '—' %></td>
+            <td><span class="pill pill-<%= c.status %>"><%= c.status %></span></td>
+            <% if (admin) { %>
+              <td>
+                <div class="btn-row">
+                  <a href="/centers/<%= c.id %>/edit" class="btn btn-sm btn-secondary">Edit</a>
+                  <form action="/centers/<%= c.id %>?_method=DELETE" method="POST" class="inline-form"
+                        onsubmit="return confirm('Delete this evacuation center?')">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+                </div>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/foot') %>

@@ -1,0 +1,33 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="page-head"><h1>My profile</h1></div>
+
+<div class="card form-card">
+  <form action="/profile" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <div class="field">
+      <label for="name">Full name</label>
+      <input type="text" id="name" name="name" value="<%= currentUser.name %>" required />
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" value="<%= currentUser.email %>" disabled />
+      <div class="hint">Email cannot be changed.</div>
+    </div>
+    <div class="field">
+      <label for="address">Home address</label>
+      <input type="text" id="address" name="address" value="<%= currentUser.address || '' %>"
+             placeholder="Barangay, City" />
+      <div class="hint">Re-geocoded via OpenStreetMap when changed.</div>
+    </div>
+    <div class="field checkbox-row">
+      <input type="checkbox" id="alerts_opt_in" name="alerts_opt_in" value="1"
+             <%= currentUser.alerts_opt_in ? 'checked' : '' %> />
+      <label for="alerts_opt_in" style="margin:0">Receive emergency email alerts</label>
+    </div>
+    <button type="submit" class="btn">Save changes</button>
+  </form>
+</div>
+
+<%- include('partials/foot') %>

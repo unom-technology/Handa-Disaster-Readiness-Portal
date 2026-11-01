@@ -1,0 +1,168 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+
+<div class="page-head">
+  <div>
+    <h1>Hello, <%= currentUser.name.split(' ')[0] %> 👋</h1>
+    <p class="sub">
+      Readiness overview for
+      <strong><%= currentUser.address || 'your area' %></strong>.
+    </p>
+  </div>
+  <a href="/reports/new" class="btn">⚠️ Report an incident</a>
+</div>
+
+<div class="grid grid-2">
+
+  <!-- Weather (Open-Meteo) -->
+  <div class="card">
+    <div class="card-title"><h2>🌦️ Weather now</h2><span class="muted small">Open-Meteo</span></div>
+    <% if (weather.error) { %>
+      <p class="empty">Weather unavailable (<%= weather.error %>)</p>
+    <% } else { const w = weather.data; %>
+      <div class="weather-now">
+        <div class="weather-icon"><%= w.icon %></div>
+        <div>
+          <div class="weather-temp"><%= Math.round(w.temperature) %>°C</div>
+          <div class="weather-meta"><%= w.text %> · feels <%= Math.round(w.feelsLike) %>°C</div>
+          <div class="weather-meta">💧 <%= w.humidity %>% · 💨 <%= Math.round(w.wind) %> km/h (gusts <%= Math.round(w.gusts) %>)</div>
+        </div>
+      </div>
+      <% if (w.flags && w.flags.length) { %>
+        <div style="margin-top:12px">
+          <% w.flags.forEach(f => { %><span class="flag">⚠ <%= f %></span><% }) %>
+        </div>
+      <% } %>
+      <div class="forecast">
+        <% w.forecast.slice(0,4).forEach(function(d){ %>
+          <div class="forecast-day">
+            <div class="d"><%= new Date(d.date).toLocaleDateString('en-US',{weekday:'short'}) %></div>
+            <div class="i"><%= d.icon %></div>
+            <div class="t"><%= Math.round(d.max) %>° / <%= Math.round(d.min) %>°</div>
+            <% if (d.rainChance != null) { %><div class="r">🌧 <%= d.rainChance %>%</div><% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- GDACS alerts -->
+  <div class="card">
+    <div class="card-title"><h2>🚨 Disaster alerts</h2><span class="muted small">GDACS</span></div>
+    <% if (alerts.error) { %>
+      <p class="empty">Alerts unavailable (<%= alerts.error %>)</p>
+    <% } else if (!alerts.data.events.length) { %>
+      <p class="empty">✅ No active GDACS alerts for the Philippines.</p>
+    <% } else { %>
+      <ul class="item-list">
+        <% alerts.data.events.slice(0,5).forEach(function(a){ %>
+          <li>
+            <span>
+              <span class="alert-level <%= a.alertLevel %>"></span>
+              <strong><%= a.type %></strong>
+              <div class="small muted"><%= a.severity || a.name %></div>
+            </span>
+            <% if (a.report) { %><a class="small" href="<%= a.report %>" target="_blank" rel="noopener">details ↗</a><% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+
+  <!-- Earthquakes (USGS) -->
+  <div class="card">
+    <div class="card-title"><h2>🌏 Recent earthquakes</h2><span class="muted small">USGS · 500 km / 7 days</span></div>
+    <% if (quakes.error) { %>
+      <p class="empty">Earthquake feed unavailable (<%= quakes.error %>)</p>
+    <% } else if (!quakes.data.quakes.length) { %>
+      <p class="empty">No significant quakes nearby. 👍</p>
+    <% } else { %>
+      <ul class="item-list">
+        <% quakes.data.quakes.slice(0,6).forEach(function(q){ %>
+          <li>
+            <span>
+              <strong>M <%= q.magnitude.toFixed(1) %></strong> — <%= q.place %>
+              <div class="small muted">
+                <%= q.distanceKm %> km away · depth <%= Math.round(q.depthKm) %> km ·
+                <%= new Date(q.time).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) %>
+                <% if (q.tsunami) { %> · <span class="flag">tsunami flag</span><% } %>
+              </div>
+            </span>
+            <a class="small" href="<%= q.url %>" target="_blank" rel="noopener">↗</a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+
+  <!-- Nearest evacuation centres -->
+  <div class="card">
+    <div class="card-title"><h2>🏠 Nearest evacuation centers</h2><span class="muted small">OSRM</span></div>
+    <% if (!nearestCenters.length) { %>
+      <p class="empty">No evacuation centers listed yet.</p>
+    <% } else { %>
+      <ul class="item-list">
+        <% nearestCenters.forEach(function(c){ %>
+          <li>
+            <span>
+              <strong><%= c.name %></strong>
+              <div class="small muted">
+                <%= c.address || '' %>
+                <% if (typeof c.distanceKm === 'number') { %> · ~<%= c.distanceKm %> km (<%= c.durationMin %> min)<% } %>
+              </div>
+            </span>
+            <span class="pill pill-<%= c.status %>"><%= c.status %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</div>
+
+<!-- Map with routing -->
+<div class="card" style="margin-top:16px">
+  <div class="card-title">
+    <h2>🗺️ Map &amp; directions</h2>
+    <span class="muted small">Leaflet · OpenStreetMap · click a center for directions</span>
+  </div>
+  <div data-map="dash-map" class="map"></div>
+</div>
+<script type="application/json" id="dash-map">
+<%- JSON.stringify({
+  center: { lat: lat, lng: lng },
+  zoom: 12,
+  user: { lat: lat, lng: lng, label: currentUser.address || 'Your location' },
+  centers: allCenters.map(c => ({ name: c.name, address: c.address, lat: c.lat, lng: c.lng, capacity: c.capacity, status: c.status })),
+  reports: (myReports || []).filter(r => r.lat != null).map(r => ({ title: r.title, type: r.type, severity: r.severity, status: r.status, lat: r.lat, lng: r.lng }))
+}) %>
+</script>
+
+<!-- My recent reports -->
+<div class="card" style="margin-top:16px">
+  <div class="card-title">
+    <h2>📝 My recent reports</h2>
+    <a href="/reports" class="small">View all →</a>
+  </div>
+  <% if (!myReports.length) { %>
+    <p class="empty">You haven't filed any reports yet. <a href="/reports/new">Report an incident</a>.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Type</th><th>Severity</th><th>Status</th><th>When</th></tr></thead>
+        <tbody>
+          <% myReports.forEach(function(r){ %>
+            <tr>
+              <td><a href="/reports/<%= r.id %>"><%= r.title %></a></td>
+              <td><%= r.type %></td>
+              <td><span class="pill pill-<%= r.severity %>"><%= r.severity %></span></td>
+              <td><span class="pill pill-<%= r.status %>"><%= r.status %></span></td>
+              <td class="small muted"><%= new Date(r.created_at + 'Z').toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

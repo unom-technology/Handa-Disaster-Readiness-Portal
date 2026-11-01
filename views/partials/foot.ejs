@@ -1,0 +1,18 @@
+</main>
+
+<footer class="site-footer">
+  <p>
+    <strong><%= appName %></strong> — <%= tagline %>.
+    Data from Open-Meteo, USGS, GDACS, OpenStreetMap/Nominatim &amp; OSRM.
+  </p>
+</footer>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+<script>window.CSRF_TOKEN = "<%= csrfToken %>";</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

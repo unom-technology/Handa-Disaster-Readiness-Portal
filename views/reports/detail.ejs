@@ -1,0 +1,65 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<div class="page-head">
+  <div>
+    <h1><%= report.title %></h1>
+    <p class="sub">
+      <span class="pill pill-<%= report.severity %>"><%= report.severity %></span>
+      <span class="pill pill-<%= report.status %>"><%= report.status %></span>
+      · <%= report.type %>
+    </p>
+  </div>
+  <a href="/reports" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Details</h3>
+    <p><%= report.description || 'No description provided.' %></p>
+    <ul class="item-list">
+      <li><span class="muted">Location</span><span><%= report.address || '—' %></span></li>
+      <li><span class="muted">Reported by</span><span><%= reporter.name %></span></li>
+      <li><span class="muted">Filed</span><span><%= new Date(report.created_at + 'Z').toLocaleString() %></span></li>
+      <li><span class="muted">Last updated</span><span><%= new Date(report.updated_at + 'Z').toLocaleString() %></span></li>
+    </ul>
+
+    <div class="btn-row" style="margin-top:14px">
+      <a href="/reports/<%= report.id %>/edit" class="btn btn-secondary">Edit</a>
+      <% if (admin) { %>
+        <form action="/reports/<%= report.id %>/status" method="POST" class="inline-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <input type="hidden" name="status" value="verified" />
+          <button class="btn btn-sm">Mark verified</button>
+        </form>
+        <form action="/reports/<%= report.id %>/status" method="POST" class="inline-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <input type="hidden" name="status" value="resolved" />
+          <button class="btn btn-sm btn-ok">Mark resolved</button>
+        </form>
+      <% } %>
+      <form action="/reports/<%= report.id %>?_method=DELETE" method="POST" class="inline-form"
+            onsubmit="return confirm('Delete this report?')">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Location</h3>
+    <% if (report.lat != null) { %>
+      <div data-map="report-map" class="map map-sm"></div>
+      <script type="application/json" id="report-map">
+      <%- JSON.stringify({
+        center: { lat: report.lat, lng: report.lng }, zoom: 15,
+        reports: [{ title: report.title, type: report.type, severity: report.severity, status: report.status, lat: report.lat, lng: report.lng }]
+      }) %>
+      </script>
+    <% } else { %>
+      <p class="empty">No map location — the address could not be geocoded.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>

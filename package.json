@@ -1,0 +1,33 @@
+{
+  "name": "handa-readiness-portal",
+  "version": "1.0.0",
+  "description": "Handa - Community Disaster Readiness Portal. An API-integrated system that aggregates weather, earthquake and disaster-alert data to help residents and barangay admins prepare for and respond to emergencies.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node src/seed.js"
+  },
+  "keywords": [
+    "disaster",
+    "readiness",
+    "nodejs",
+    "express",
+    "api-integration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.2.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "method-override": "^3.0.0",
+    "nodemailer": "^6.9.15"
+  }
+}

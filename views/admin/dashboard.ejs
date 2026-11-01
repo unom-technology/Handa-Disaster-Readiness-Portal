@@ -1,0 +1,107 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<div class="page-head">
+  <div>
+    <h1>📊 Admin dashboard</h1>
+    <p class="sub">Community readiness at a glance.</p>
+  </div>
+  <a href="/admin/alerts" class="btn btn-danger">🚨 Send emergency alert</a>
+</div>
+
+<!-- Stat tiles -->
+<div class="grid grid-4">
+  <div class="stat"><div class="num"><%= stats.users %></div><div class="label">Total users</div></div>
+  <div class="stat"><div class="num"><%= stats.residents %></div><div class="label">Residents</div></div>
+  <div class="stat <%= stats.pending ? 'warn' : '' %>"><div class="num"><%= stats.reports %></div><div class="label"><%= stats.pending %> pending reports</div></div>
+  <div class="stat ok"><div class="num"><%= stats.openCenters %>/<%= stats.centers %></div><div class="label">Open evac centers</div></div>
+  <div class="stat"><div class="num"><%= stats.broadcasts %></div><div class="label">Alerts sent</div></div>
+  <div class="stat <%= alertCount ? 'danger' : 'ok' %>">
+    <div class="num"><%= alertCount != null ? alertCount : '—' %></div>
+    <div class="label">Live GDACS alerts (PH)</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+  <!-- Reports by type -->
+  <div class="card">
+    <div class="card-title"><h2>Reports by type</h2></div>
+    <% if (!reportsByType.length) { %>
+      <p class="empty">No reports yet.</p>
+    <% } else {
+         const maxN = Math.max.apply(null, reportsByType.map(r => r.n)); %>
+      <% reportsByType.forEach(function(r){ %>
+        <div style="margin-bottom:10px">
+          <div class="small" style="display:flex;justify-content:space-between">
+            <span><%= r.type %></span><strong><%= r.n %></strong>
+          </div>
+          <div style="background:#eef2f7;border-radius:6px;height:10px;overflow:hidden">
+            <div style="height:100%;width:<%= Math.round(r.n / maxN * 100) %>%;background:var(--brand)"></div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <!-- Reports by status -->
+  <div class="card">
+    <div class="card-title"><h2>Reports by status</h2></div>
+    <% if (!reportsByStatus.length) { %>
+      <p class="empty">No reports yet.</p>
+    <% } else { %>
+      <div class="grid grid-3">
+        <% reportsByStatus.forEach(function(s){ %>
+          <div class="stat">
+            <div class="num"><%= s.n %></div>
+            <div class="label"><span class="pill pill-<%= s.status %>"><%= s.status %></span></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+    <p class="small muted" style="margin-top:14px">Manage all reports on the <a href="/reports">Reports page</a>.</p>
+  </div>
+</div>
+
+<!-- Community map -->
+<div class="card" style="margin-top:16px">
+  <div class="card-title">
+    <h2>🗺️ Community map</h2>
+    <span class="muted small">Reports (by severity) &amp; evacuation centers</span>
+  </div>
+  <div data-map="admin-map" class="map"></div>
+</div>
+<script type="application/json" id="admin-map">
+<%- JSON.stringify({
+  center: mapCenter, zoom: 11,
+  centers: centers.map(c => ({ name: c.name, address: c.address, lat: c.lat, lng: c.lng, capacity: c.capacity, status: c.status })),
+  reports: allReports.map(r => ({ title: r.title, type: r.type, severity: r.severity, status: r.status, lat: r.lat, lng: r.lng }))
+}) %>
+</script>
+
+<!-- Recent reports -->
+<div class="card" style="margin-top:16px">
+  <div class="card-title"><h2>Recent reports</h2><a href="/reports" class="small">View all →</a></div>
+  <% if (!recentReports.length) { %>
+    <p class="empty">No reports yet.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Type</th><th>Reporter</th><th>Severity</th><th>Status</th><th>When</th></tr></thead>
+        <tbody>
+          <% recentReports.forEach(function(r){ %>
+            <tr>
+              <td><a href="/reports/<%= r.id %>"><%= r.title %></a></td>
+              <td><%= r.type %></td>
+              <td class="small"><%= r.reporter %></td>
+              <td><span class="pill pill-<%= r.severity %>"><%= r.severity %></span></td>
+              <td><span class="pill pill-<%= r.status %>"><%= r.status %></span></td>
+              <td class="small muted"><%= new Date(r.created_at + 'Z').toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/foot') %>

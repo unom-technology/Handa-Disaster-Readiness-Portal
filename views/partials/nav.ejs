@@ -1,0 +1,39 @@
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">
+      <span class="brand-logo">🛟</span>
+      <span class="brand-text">
+        <strong><%= appName %></strong>
+        <small><%= tagline %></small>
+      </span>
+    </a>
+
+    <nav class="mainnav">
+      <% if (currentUser) { %>
+        <% if (currentUser.role === 'admin') { %>
+          <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>">Dashboard</a>
+          <a href="/reports" class="<%= path.startsWith('/reports') ? 'active' : '' %>">Reports</a>
+          <a href="/centers" class="<%= path.startsWith('/centers') ? 'active' : '' %>">Centers</a>
+          <a href="/admin/users" class="<%= path === '/admin/users' ? 'active' : '' %>">Users</a>
+          <a href="/admin/alerts" class="<%= path === '/admin/alerts' ? 'active' : '' %>">Send Alert</a>
+        <% } else { %>
+          <a href="/dashboard" class="<%= path === '/dashboard' ? 'active' : '' %>">Dashboard</a>
+          <a href="/reports" class="<%= path.startsWith('/reports') ? 'active' : '' %>">My Reports</a>
+          <a href="/centers" class="<%= path.startsWith('/centers') ? 'active' : '' %>">Evac Centers</a>
+        <% } %>
+        <a href="/profile" class="<%= path === '/profile' ? 'active' : '' %>">Profile</a>
+        <form action="/logout" method="POST" class="inline-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button type="submit" class="btn-link">Log out</button>
+        </form>
+        <span class="role-badge <%= currentUser.role %>"><%= currentUser.role %></span>
+      <% } else { %>
+        <a href="/login" class="<%= path === '/login' ? 'active' : '' %>">Log in</a>
+        <a href="/register" class="btn btn-sm">Sign up</a>
+      <% } %>
+    </nav>
+  </div>
+</header>
+
+<%- include('flash') %>
+<main class="container">
